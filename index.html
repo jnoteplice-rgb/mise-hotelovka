@@ -690,6 +690,27 @@ function markLessonLearned(lessonId) {
   toast('✓ Super! Lekce „' + u.title + '" odemčená.');
 }
 
+// ---------- Answer log (odpovědi na jednotlivé otázky) ----------
+// Pošle záznam odpovědi rovnou do Sheetu. Neukládá do state (jinak by se state nafukoval o stovky odpovědí).
+function logAnswer(data) {
+  const ev = {
+    type: 'answer',
+    ts: new Date().toISOString(),
+    deviceId: state.deviceId,
+    ...(data || {})
+  };
+  if (WEBHOOK_URL) {
+    try {
+      fetch(WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'log_event', event: ev })
+      }).catch(() => {});
+    } catch (e) {}
+  }
+}
+
 // ---------- Event log ----------
 function logEvent(type, data) {
   const ev = {
@@ -942,7 +963,19 @@ function renderDiagnostic(params) {
         if (i === q.correct) o.classList.add('correct');
         if (i === selected && selected !== q.correct) o.classList.add('wrong');
       });
-      answers.push({ track: q.track, correct: selected === q.correct });
+      const isCorrect = selected === q.correct;
+      answers.push({ track: q.track, correct: isCorrect });
+      logAnswer({
+        context: 'diagnostic',
+        track: q.track,
+        questionIdx: idx,
+        question: q.q,
+        chosen: q.options[selected],
+        chosenIdx: selected,
+        correctAnswer: q.options[q.correct],
+        correctIdx: q.correct,
+        isCorrect: isCorrect
+      });
       incrementTodayCount();
       setTimeout(() => {
         if (idx + 1 < DIAGNOSTIC.length) go('diagnostic', { idx: idx + 1, answers });
@@ -1080,6 +1113,19 @@ function renderLesson(params) {
       });
       const correct = selected === q.correct;
       answers.push({ correct });
+      logAnswer({
+        context: 'lesson',
+        track: track,
+        lessonId: lesson.id,
+        lessonTitle: lesson.title,
+        questionIdx: idx,
+        question: q.q,
+        chosen: q.options[selected],
+        chosenIdx: selected,
+        correctAnswer: q.options[q.correct],
+        correctIdx: q.correct,
+        isCorrect: correct
+      });
       incrementTodayCount();
       const ubtn = wrap.querySelector('#untaught-btn');
       if (ubtn) ubtn.style.display = 'none';
