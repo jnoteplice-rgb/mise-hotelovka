@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#6366f1">
+<title>Mise: Hotelovka</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --bg: #0f172a;
+    --bg-soft: #1e293b;
+    --card: #1e293b;
+    --card-hover: #334155;
+    --border: #334155;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --primary: #6366f1;
+    --primary-hover: #818cf8;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --cj: #ec4899;
+    --m: #3b82f6;
+    --aj: #10b981;
+    --hotel: #f59e0b;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(circle at 20% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 100%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+  .app { max-width: 720px; margin: 0 auto; padding: 16px; padding-bottom: 80px; }
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 4px; margin-bottom: 16px;
+  }
+  .logo {
+    font-size: 20px; font-weight: 800;
+    background: linear-gradient(135deg, #f59e0b, #ec4899);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    letter-spacing: -0.5px;
+  }
+  .stats { display: flex; gap: 8px; align-items: center; }
+  .stat {
+    background: var(--card); padding: 6px 10px; border-radius: 10px;
+    font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 4px;
+    border: 1px solid var(--border);
+  }
+  .stat.streak { color: #f59e0b; }
+  .stat.xp { color: #a78bfa; }
+  .stat.level { color: #10b981; }
+
+  .card {
+    background: var(--card); border-radius: 16px; padding: 20px;
+    margin-bottom: 12px; border: 1px solid var(--border);
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .card.clickable { cursor: pointer; }
+  .card.clickable:active { transform: scale(0.98); }
+
+  h1 { font-size: 28px; margin-bottom: 8px; font-weight: 800; letter-spacing: -0.5px; }
+  h2 { font-size: 20px; margin-bottom: 12px; font-weight: 700; }
+  h3 { font-size: 16px; font-weight: 700; }
+  p { color: var(--text-dim); line-height: 1.5; font-size: 15px; }
+
+  .btn {
+    background: var(--primary); color: white; border: none;
+    padding: 14px 24px; border-radius: 12px; font-size: 16px; font-weight: 700;
+    cursor: pointer; width: 100%; transition: all 0.15s;
+    font-family: inherit;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn:hover { background: var(--primary-hover); }
+  .btn.secondary { background: var(--card-hover); }
+  .btn.success { background: var(--success); }
+  .btn.danger { background: var(--danger); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-group { display: flex; gap: 8px; margin-top: 16px; }
+  .btn-group .btn { flex: 1; }
+
+  .hero {
+    text-align: center; padding: 32px 16px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(236,72,153,0.2));
+    border-radius: 20px; margin-bottom: 20px;
+    border: 1px solid var(--border);
+  }
+  .hero .emoji { font-size: 56px; margin-bottom: 12px; }
+  .hero h1 { margin-bottom: 12px; }
+  .hero p { font-size: 16px; max-width: 480px; margin: 0 auto 20px; }
+
+  .track-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .track-card {
+    padding: 16px; border-radius: 16px; background: var(--card);
+    border: 2px solid var(--border); cursor: pointer;
+    transition: all 0.15s; position: relative; overflow: hidden;
+  }
+  .track-card:hover { border-color: var(--track-color); }
+  .track-card:active { transform: scale(0.97); }
+  .track-card .icon { font-size: 32px; margin-bottom: 8px; }
+  .track-card h3 { margin-bottom: 4px; }
+  .track-card .subtitle { font-size: 12px; color: var(--text-dim); margin-bottom: 10px; }
+  .track-card .progress {
+    height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden;
+  }
+  .track-card .progress-bar {
+    height: 100%; background: var(--track-color);
+    transition: width 0.3s;
+  }
+  .track-card .progress-text {
+    font-size: 11px; color: var(--text-dim); margin-top: 4px; font-weight: 600;
+  }
+  .track-card.cj { --track-color: var(--cj); }
+  .track-card.m { --track-color: var(--m); }
+  .track-card.aj { --track-color: var(--aj); }
+  .track-card.hotel { --track-color: var(--hotel); }
+
+  .goal-card {
+    background: var(--card); border: 1px solid var(--border);
+    padding: 14px 16px; border-radius: 16px; margin-bottom: 12px;
+  }
+  .goal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .goal-title { font-size: 15px; font-weight: 700; }
+  .goal-count { font-size: 14px; font-weight: 700; color: var(--text-dim); }
+  .goal-bar {
+    position: relative; height: 10px; background: var(--bg-soft);
+    border-radius: 5px; overflow: hidden; margin-bottom: 8px;
+  }
+  .goal-bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--primary), var(--cj));
+    transition: width 0.4s ease-out;
+  }
+  .goal-bar-fill.done {
+    background: linear-gradient(90deg, var(--success), var(--warning));
+  }
+  .goal-bar-milestone {
+    position: absolute; top: -2px; width: 2px; height: 14px;
+    background: var(--warning); opacity: 0.7;
+  }
+  .goal-meta { font-size: 12px; color: var(--text-dim); font-weight: 500; }
+
+  .untaught-btn {
+    background: rgba(245, 158, 11, 0.15); color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 10px 14px; border-radius: 10px; font-size: 13px;
+    font-weight: 600; cursor: pointer; margin-top: 12px;
+    font-family: inherit; width: 100%;
+  }
+  .untaught-btn:hover { background: rgba(245, 158, 11, 0.25); }
+  .untaught-btn:active { transform: scale(0.98); }
+
+  .lesson-item.untaught { opacity: 0.65; border-color: rgba(245, 158, 11, 0.3); }
+  .lesson-item.untaught .num { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+  .lesson-untaught-badge {
+    font-size: 10px; font-weight: 700; color: #fbbf24;
+    background: rgba(245, 158, 11, 0.15); padding: 2px 6px;
+    border-radius: 4px; margin-left: 6px; letter-spacing: 0.5px;
+  }
+
+  .daily {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(236, 72, 153, 0.2));
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 16px; border-radius: 16px; margin-bottom: 16px;
+    cursor: pointer;
+  }
+  .daily .label { font-size: 12px; font-weight: 700; color: #f59e0b; margin-bottom: 4px; letter-spacing: 1px; }
+  .daily h3 { margin-bottom: 4px; }
+  .daily.done { opacity: 0.6; }
+
+  .question-card {
+    background: var(--card); padding: 20px; border-radius: 16px;
+    margin-bottom: 16px; border: 1px solid var(--border);
+  }
+  .question-num {
+    font-size: 12px; color: var(--text-dim); font-weight: 700;
+    margin-bottom: 8px; letter-spacing: 1px;
+  }
+  .question-text {
+    font-size: 18px; font-weight: 600; line-height: 1.4; margin-bottom: 20px;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    background: var(--bg-soft); padding: 14px 16px; border-radius: 12px;
+    cursor: pointer; border: 2px solid var(--border);
+    transition: all 0.15s; font-size: 15px; font-weight: 500;
+  }
+  .option:hover { border-color: var(--primary); }
+  .option:active { transform: scale(0.98); }
+  .option.selected { border-color: var(--primary); background: rgba(99, 102, 241, 0.1); }
+  .option.correct { border-color: var(--success); background: rgba(16, 185, 129, 0.15); }
+  .option.wrong { border-color: var(--danger); background: rgba(239, 68, 68, 0.15); }
+  .option.correct::after { content: " ✓"; color: var(--success); font-weight: bold; }
+  .option.wrong::after { content: " ✗"; color: var(--danger); font-weight: bold; }
+
+  .progress-top {
+    height: 8px; background: var(--border); border-radius: 4px;
+    margin-bottom: 16px; overflow: hidden;
+  }
+  .progress-top-bar {
+    height: 100%; background: linear-gradient(90deg, var(--primary), var(--cj));
+    transition: width 0.3s;
+  }
+
+  .feedback {
+    padding: 14px 16px; border-radius: 12px; margin-top: 12px;
+    font-size: 14px; font-weight: 500;
+  }
+  .feedback.correct { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+  .feedback.wrong { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+  .result-hero {
+    text-align: center; padding: 32px 16px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(99, 102, 241, 0.2));
+    border-radius: 20px; margin-bottom: 16px;
+  }
+  .result-hero .score {
+    font-size: 56px; font-weight: 800; margin: 12px 0;
+    background: linear-gradient(135deg, #10b981, #6366f1);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  .diagnostic-results { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .result-item {
+    padding: 14px; border-radius: 12px; background: var(--card);
+    border: 1px solid var(--border);
+  }
+  .result-item .name { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .result-item .bar { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+  .result-item .bar-fill { height: 100%; transition: width 0.5s; }
+  .result-item .pct { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+  .back-btn {
+    background: var(--card); border: 1px solid var(--border);
+    padding: 8px 14px; border-radius: 10px; color: var(--text);
+    font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 12px;
+    font-family: inherit;
+  }
+  .back-btn:hover { background: var(--card-hover); }
+
+  .lesson-list { display: flex; flex-direction: column; gap: 8px; }
+  .lesson-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; background: var(--card); border-radius: 12px;
+    border: 1px solid var(--border); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .lesson-item:hover { border-color: var(--primary); }
+  .lesson-item:active { transform: scale(0.98); }
+  .lesson-item .num {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--bg-soft); display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; flex-shrink: 0;
+  }
+  .lesson-item.done .num { background: var(--success); color: white; }
+  .lesson-item .info { flex: 1; }
+  .lesson-item .info .title { font-weight: 600; font-size: 15px; }
+  .lesson-item .info .meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  .lesson-item .arrow { color: var(--text-dim); }
+
+  .badge-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+  .badge {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    background: var(--bg-soft); border-radius: 12px; font-size: 28px;
+    border: 1px solid var(--border); opacity: 0.3;
+  }
+  .badge.earned { opacity: 1; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(236,72,153,0.2)); border-color: var(--warning); }
+
+  .toast {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--card); padding: 12px 20px; border-radius: 12px;
+    border: 1px solid var(--success); color: var(--success);
+    font-weight: 600; font-size: 14px; z-index: 1000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: slideDown 0.3s ease-out;
+  }
+  @keyframes slideDown {
+    from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+  }
+
+  .empty {
+    text-align: center; padding: 40px 20px; color: var(--text-dim);
+  }
+
+  .chip {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;
+    margin-right: 6px;
+  }
+  .chip.cj { background: rgba(236, 72, 153, 0.2); color: #ec4899; }
+  .chip.m { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+  .chip.aj { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+  .chip.hotel { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 24px; }
+    .hero .emoji { font-size: 48px; }
+    .hero { padding: 24px 12px; }
+    .diagnostic-results { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+const TRACKS = {
+  cj:    { name: 'Čeština',     icon: '📝', color: 'var(--cj)',    subtitle: 'Pravopis, literatura, sloh' },
+  m:     { name: 'Matematika',  icon: '🔢', color: 'var(--m)',     subtitle: 'Počty, geometrie, logika' },
+  aj:    { name: 'Angličtina',  icon: '🇬🇧', color: 'var(--aj)',    subtitle: 'Gramatika, slovíčka' },
+  hotel: { name: 'Hotelovka',   icon: '🏨', color: 'var(--hotel)', subtitle: 'Všeobecný přehled' }
+};
+
+const DIAGNOSTIC = [
+  { track: 'cj', q: 'Doplň: B_li jsme v kin_.', options: ['Byli, kině', 'Byly, kině', 'Byli, kínu', 'Bili, kině'], correct: 0, hint: 'Chlapci: -li; lokál slova "kino" je "kině".' },
+  { track: 'cj', q: 'Doplň: Vzpomněl si na ___.', options: ['mě', 'mně'], correct: 0, hint: '"Na koho? – na mě." 4. pád = mě.' },
+  { track: 'cj', q: 'Která věta má správně čárky?', options: ['Když přišla, dala mu dárek.', 'Když přišla dala mu dárek.', 'Když, přišla dala mu dárek.', 'Když přišla dala, mu dárek.'], correct: 0, hint: 'Vedlejší věta se odděluje čárkou.' },
+  { track: 'cj', q: 'Kdo napsal Babičku?', options: ['Božena Němcová', 'Karel Čapek', 'Karel Hynek Mácha', 'Jaroslav Seifert'], correct: 0, hint: 'Klasika českého obrození.' },
+  { track: 'cj', q: 'Který slovní druh je slovo "rychle"?', options: ['přídavné jméno', 'příslovce', 'zájmeno', 'částice'], correct: 1, hint: 'Vyjadřuje okolnost – jak?' },
+
+  { track: 'm', q: 'Kolik je 25 % z 80?', options: ['15', '20', '25', '30'], correct: 1, hint: '25 % = čtvrtina.' },
+  { track: 'm', q: 'Vyřeš: 3x + 5 = 20. x = ?', options: ['3', '5', '15', '7'], correct: 1, hint: '3x = 15, takže x = 5.' },
+  { track: 'm', q: 'Obsah obdélníku se stranami 5 a 8 cm?', options: ['13 cm²', '26 cm²', '40 cm²', '80 cm²'], correct: 2, hint: 'S = a · b.' },
+  { track: 'm', q: 'Auto jede 60 km/h. Za kolik hodin ujede 180 km?', options: ['2', '3', '4', '5'], correct: 1, hint: 't = s / v.' },
+  { track: 'm', q: 'Ze 40 žáků je 15 dívek. Kolik je to procent?', options: ['15 %', '25 %', '37,5 %', '40 %'], correct: 2, hint: '15/40 = 0,375.' },
+
+  { track: 'aj', q: 'I ___ to school every day.', options: ['go', 'goes', 'went', 'going'], correct: 0, hint: 'Present simple, 1. osoba.' },
+  { track: 'aj', q: 'He ___ watching TV yesterday.', options: ['is', 'was', 'were', 'are'], correct: 1, hint: 'Past continuous, 3. osoba jednotného čísla.' },
+  { track: 'aj', q: 'Co znamená "breakfast"?', options: ['oběd', 'večeře', 'snídaně', 'svačina'], correct: 2, hint: 'Break + fast = přerušit půst.' },
+  { track: 'aj', q: '___ you like pizza?', options: ['Are', 'Is', 'Do', 'Does'], correct: 2, hint: 'Otázka v present simple, "you".' },
+  { track: 'aj', q: 'Překlad: "Jak se jmenuješ?"', options: ['How old are you?', "What\u0027s your name?", 'Where are you from?', 'How are you?'], correct: 1, hint: 'Doslova: "Jaké je tvé jméno?"' },
+
+  { track: 'hotel', q: 'Hlavní město Itálie?', options: ['Milán', 'Řím', 'Benátky', 'Florencie'], correct: 1, hint: 'Město na sedmi pahorcích.' },
+  { track: 'hotel', q: 'Co je "room service"?', options: ['úklid pokoje', 'donáška jídla na pokoj', 'recepce', 'spropitné'], correct: 1, hint: 'Obsluha přímo na pokoji.' },
+  { track: 'hotel', q: 'Kolik krajů má Česká republika?', options: ['12', '13', '14', '15'], correct: 2, hint: '13 + Praha jako samostatný kraj.' },
+  { track: 'hotel', q: 'Předkrm se servíruje:', options: ['po hlavním jídle', 'před hlavním jídlem', 'místo hlavního jídla', 's hlavním jídlem'], correct: 1, hint: 'Jmenuje se pře-dkrm.' },
+  { track: 'hotel', q: 'Co znamená "all inclusive"?', options: ['jen snídaně', 'polopenze', 'vše v ceně', 'bez stravy'], correct: 2, hint: 'Doslova "vše zahrnuto".' }
+];
+
+const LESSONS = {
+  cj: [
+    {
+      id: 'cj-1', title: 'Vyjmenovaná slova po B', difficulty: 1,
+      questions: [
+        { q: 'Doplň i/y: b_linka v lese', options: ['i', 'y'], correct: 1, hint: 'Bylinka – od "být".' },
+        { q: 'Doplň i/y: b_dlo (místo, kde žijeme)', options: ['i', 'y'], correct: 1, hint: 'Bydlo – kde se bydlí.' },
+        { q: 'Doplň i/y: b_t či neb_t', options: ['i, i', 'y, y', 'i, y', 'y, i'], correct: 1, hint: 'Vyjmenované slovo "být".' },
+        { q: 'Doplň i/y: b_č na prach', options: ['i', 'y'], correct: 0, hint: 'Bič – není ve vyjmenovaných slovech.' },
+        { q: 'Doplň i/y: zb_tek peněz', options: ['i', 'y'], correct: 1, hint: 'Od "být" – co zbývá.' }
+      ]
+    },
+    {
+      id: 'cj-2', title: 'mě / mně', difficulty: 1,
+      questions: [
+        { q: 'Vzpomněl si na ___.', options: ['mě', 'mně'], correct: 0, hint: '"Na koho?" – 4. pád = mě.' },
+        { q: 'Dal to ___.', options: ['mě', 'mně'], correct: 1, hint: '"Komu?" – 3. pád = mně.' },
+        { q: 'Mluvil o ___.', options: ['mě', 'mně'], correct: 1, hint: '"O kom?" – 6. pád = mně.' },
+        { q: '___ to nevadí.', options: ['Mě', 'Mně'], correct: 1, hint: '"Komu?" – 3. pád = mně.' },
+        { q: 'Viděl ___ na nádraží.', options: ['mě', 'mně'], correct: 0, hint: '"Koho?" – 4. pád = mě.' }
+      ]
+    },
+    {
+      id: 'cj-3', title: 'Shoda podmětu s přísudkem', difficulty: 2,
+      questions: [
+        { q: 'Chlapci běžel_ do lesa.', options: ['y', 'i'], correct: 1, hint: 'Mužský rod životný – i.' },
+        { q: 'Květiny vykvetl_ brzo.', options: ['y', 'i'], correct: 0, hint: 'Ženský rod – y.' },
+        { q: 'Okna zářil_ ve slunci.', options: ['y', 'a'], correct: 1, hint: 'Střední rod – a.' },
+        { q: 'Psi štěkal_ celou noc.', options: ['y', 'i'], correct: 1, hint: 'Mužský rod životný – i.' },
+        { q: 'Stroje pracoval_ bez přestávky.', options: ['y', 'i'], correct: 0, hint: 'Mužský rod neživotný – y.' }
+      ]
+    },
+    {
+      id: 'cj-4', title: 'Literatura 19. století', difficulty: 2,
+      questions: [
+        { q: 'Kdo napsal Máj?', options: ['K. H. Mácha', 'B. Němcová', 'J. Neruda', 'K. J. Erben'], correct: 0, hint: 'Největší český romantik.' },
+        { q: 'Kytice (sbírka balad) je dílo:', options: ['Máchy', 'Erbena', 'Nerudy', 'Čapka'], correct: 1, hint: 'Balady Polednice, Vodník, Svatební košile...' },
+        { q: 'Babička se odehrává:', options: ['v Praze', 'na Starém bělidle', 'v Brně', 'na Moravě'], correct: 1, hint: 'Ratibořické údolí.' },
+        { q: 'Jan Neruda psal:', options: ['jen romány', 'povídky a fejetony', 'jen básně', 'divadelní hry'], correct: 1, hint: 'Povídky malostranské.' },
+        { q: 'Co je balada?', options: ['veselá báseň', 'báseň s tragickým koncem', 'krátký román', 'divadelní hra'], correct: 1, hint: 'Často s nadpřirozenými prvky a špatným koncem.' }
+      ]
+    },
+    {
+      id: 'cj-5', title: 'Slovní druhy', difficulty: 1,
+      questions: [
+        { q: '"Rychle" je:', options: ['přídavné jméno', 'příslovce', 'sloveso', 'zájmeno'], correct: 1, hint: 'Jak? Rychle.' },
+        { q: '"Krásný" je:', options: ['podstatné jméno', 'přídavné jméno', 'příslovce', 'číslovka'], correct: 1, hint: 'Jaký? Krásný.' },
+        { q: '"Pět" je:', options: ['podstatné jméno', 'přídavné jméno', 'číslovka', 'příslovce'], correct: 2, hint: 'Kolik? Pět.' },
+        { q: '"Ale" je:', options: ['spojka', 'předložka', 'částice', 'citoslovce'], correct: 0, hint: 'Spojuje věty.' },
+        { q: '"Pod stolem" – "pod" je:', options: ['předložka', 'spojka', 'částice', 'příslovce'], correct: 0, hint: 'Stojí před podstatným jménem.' }
+      ]
+    }
+  ],
+  m: [
+    {
+      id: 'm-1', title: 'Procenta – základ', difficulty: 1,
+      questions: [
+        { q: 'Kolik je 10 % z 200?', options: ['10', '20', '50', '100'], correct: 1, hint: '10 % = desetina.' },
+        { q: 'Kolik je 50 % ze 60?', options: ['20', '30', '40', '60'], correct: 1, hint: '50 % = polovina.' },
+        { q: 'Kolik % je 15 ze 60?', options: ['15 %', '25 %', '40 %', '75 %'], correct: 1, hint: '15/60 = 0,25.' },
+        { q: 'Tričko za 400 Kč zlevnili o 25 %. Nová cena?', options: ['100 Kč', '300 Kč', '350 Kč', '375 Kč'], correct: 1, hint: '25 % ze 400 = 100, 400 – 100.' },
+        { q: 'Základ je 80. Kolik je 125 % ze základu?', options: ['100', '125', '90', '160'], correct: 0, hint: '125 % = 1,25 × 80.' }
+      ]
+    },
+    {
+      id: 'm-2', title: 'Lineární rovnice', difficulty: 2,
+      questions: [
+        { q: '2x = 14. x = ?', options: ['5', '6', '7', '8'], correct: 2, hint: 'Děl dvěma.' },
+        { q: 'x + 8 = 15. x = ?', options: ['7', '8', '9', '23'], correct: 0, hint: '15 - 8.' },
+        { q: '3x - 5 = 10. x = ?', options: ['3', '5', '15', '45'], correct: 1, hint: '3x = 15.' },
+        { q: '2(x + 3) = 20. x = ?', options: ['5', '7', '10', '17'], correct: 1, hint: 'x + 3 = 10.' },
+        { q: '5x = 3x + 10. x = ?', options: ['2', '5', '10', '15'], correct: 1, hint: '2x = 10.' }
+      ]
+    },
+    {
+      id: 'm-3', title: 'Obvod a obsah', difficulty: 1,
+      questions: [
+        { q: 'Obvod čtverce o straně 6 cm?', options: ['12 cm', '24 cm', '36 cm', '48 cm'], correct: 1, hint: '4 × a.' },
+        { q: 'Obsah čtverce o straně 6 cm?', options: ['12 cm²', '24 cm²', '36 cm²', '48 cm²'], correct: 2, hint: 'a × a.' },
+        { q: 'Obvod obdélníku 3 × 5 cm?', options: ['8 cm', '15 cm', '16 cm', '30 cm'], correct: 2, hint: '2(a + b).' },
+        { q: 'Obsah trojúhelníku se základnou 8 a výškou 5?', options: ['13', '20', '40', '80'], correct: 1, hint: 'S = (z × v) / 2.' },
+        { q: 'Obvod kruhu o poloměru 10 cm (π ≈ 3,14)?', options: ['31,4', '62,8', '314', '100'], correct: 1, hint: 'o = 2πr.' }
+      ]
+    },
+    {
+      id: 'm-4', title: 'Slovní úlohy', difficulty: 2,
+      questions: [
+        { q: 'Péťa má 3× více peněz než Míša. Dohromady 200 Kč. Kolik má Péťa?', options: ['50 Kč', '100 Kč', '150 Kč', '75 Kč'], correct: 2, hint: 'x + 3x = 200.' },
+        { q: 'Vlak jede 80 km/h. Za 2,5 hodiny ujede:', options: ['100 km', '160 km', '200 km', '240 km'], correct: 2, hint: 's = v × t.' },
+        { q: 'Bazén se plní 6 hodin jedním kohoutkem. Dvěma stejnými:', options: ['2 h', '3 h', '4 h', '12 h'], correct: 1, hint: 'Polovina času.' },
+        { q: 'Tři kila jablek stojí 75 Kč. Pět kil stojí:', options: ['100 Kč', '125 Kč', '150 Kč', '175 Kč'], correct: 1, hint: '1 kilo = 25 Kč.' },
+        { q: 'Z 200 žáků je 40 % chlapců. Dívek je:', options: ['60', '80', '120', '160'], correct: 2, hint: '60 % z 200.' }
+      ]
+    },
+    {
+      id: 'm-5', title: 'Zlomky', difficulty: 1,
+      questions: [
+        { q: '1/2 + 1/4 = ?', options: ['2/6', '1/6', '3/4', '2/4'], correct: 2, hint: 'Společný jmenovatel 4.' },
+        { q: '2/3 × 3/4 = ?', options: ['5/7', '1/2', '3/7', '1/4'], correct: 1, hint: '6/12 = 1/2.' },
+        { q: '3/4 - 1/2 = ?', options: ['2/2', '1/4', '2/4', '1/2'], correct: 1, hint: '3/4 - 2/4.' },
+        { q: 'Který zlomek je větší? 2/3 nebo 3/5?', options: ['2/3', '3/5', 'Jsou stejné', 'Nelze určit'], correct: 0, hint: '10/15 vs 9/15.' },
+        { q: '5/6 jako desetinné číslo (přibližně):', options: ['0,5', '0,6', '0,83', '0,92'], correct: 2, hint: '5 : 6 ≈ 0,833.' }
+      ]
+    }
+  ],
+  aj: [
+    {
+      id: 'aj-1', title: 'Present simple', difficulty: 1,
+      questions: [
+        { q: 'She ___ coffee every morning.', options: ['drink', 'drinks', 'drinking', 'drank'], correct: 1, hint: '3. osoba j. č. → -s.' },
+        { q: 'We ___ in Prague.', options: ['live', 'lives', 'living', 'lived'], correct: 0, hint: '1. osoba mn. č. → bez -s.' },
+        { q: '___ he play football?', options: ['Do', 'Does', 'Is', 'Are'], correct: 1, hint: 'Otázka, 3. osoba → does.' },
+        { q: 'They ___ like fish.', options: ["don\u0027t", "doesn\u0027t", 'not', 'no'], correct: 0, hint: 'Zápor, 3. osoba mn. č.' },
+        { q: 'My sister ___ TV in the evening.', options: ['watch', 'watches', 'watching', 'watched'], correct: 1, hint: '3. osoba j. č. → -es po -ch.' }
+      ]
+    },
+    {
+      id: 'aj-2', title: 'Past simple', difficulty: 2,
+      questions: [
+        { q: 'Yesterday I ___ to the cinema.', options: ['go', 'went', 'gone', 'goes'], correct: 1, hint: 'Go – went (nepravidelné).' },
+        { q: 'She ___ her homework last night.', options: ['do', 'did', 'does', 'done'], correct: 1, hint: 'Do – did.' },
+        { q: '___ you see Peter?', options: ['Do', 'Does', 'Did', 'Was'], correct: 2, hint: 'Minulý čas → did.' },
+        { q: 'We ___ at home yesterday.', options: ['was', 'were', 'are', 'be'], correct: 1, hint: '"We" + were.' },
+        { q: 'He ___ a car last year.', options: ['buy', 'buys', 'bought', 'buying'], correct: 2, hint: 'Buy – bought.' }
+      ]
+    },
+    {
+      id: 'aj-3', title: 'Hotel & restaurant', difficulty: 1,
+      questions: [
+        { q: '"Recepce" je:', options: ['lobby', 'reception', 'kitchen', 'room'], correct: 1, hint: 'Latinské "recipere".' },
+        { q: '"Pokoj pro jednoho" je:', options: ['double room', 'single room', 'suite', 'dorm'], correct: 1, hint: 'Single = jeden.' },
+        { q: '"Rezervovat" = to ___.', options: ['order', 'book', 'read', 'buy'], correct: 1, hint: 'To book a table/room.' },
+        { q: '"Účet v restauraci" je:', options: ['ticket', 'menu', 'bill', 'receipt'], correct: 2, hint: 'Can I have the bill, please?' },
+        { q: '"Snídaně v ceně" = breakfast ___.', options: ['free', 'included', 'extra', 'paid'], correct: 1, hint: 'Included = zahrnutý.' }
+      ]
+    },
+    {
+      id: 'aj-4', title: 'Otázky a zápor', difficulty: 2,
+      questions: [
+        { q: 'Jak se zeptáš "Kde bydlíš?"', options: ['Where you live?', 'Where do you live?', 'Where are you live?', 'Where live you?'], correct: 1, hint: 'Present simple → do.' },
+        { q: 'Jak se zeptáš na věk?', options: ['How old are you?', 'What old you?', 'How are you old?', 'How many years you?'], correct: 0, hint: 'Doslova "jak starý jsi".' },
+        { q: 'Zápor: I like it. →', options: ["I not like it.", "I don\u0027t like it.", "I doesn\u0027t like it.", "I no like it."], correct: 1, hint: 'don\u0027t + základní tvar.' },
+        { q: '"Kolik to stojí?"', options: ['How much is it?', 'How many it?', 'What cost?', 'How much are it?'], correct: 0, hint: 'Cena – How much.' },
+        { q: '"Mluvíš anglicky?"', options: ['You speak English?', 'Do you speak English?', 'Are you speak English?', 'Speak you English?'], correct: 1, hint: 'Do + you + základní tvar.' }
+      ]
+    },
+    {
+      id: 'aj-5', title: 'Food & drinks', difficulty: 1,
+      questions: [
+        { q: '"Polévka" je:', options: ['salad', 'soup', 'sauce', 'steak'], correct: 1, hint: 'Kuřecí soup.' },
+        { q: '"Hovězí" je:', options: ['pork', 'beef', 'chicken', 'fish'], correct: 1, hint: 'Beefsteak.' },
+        { q: '"Zmrzlina" je:', options: ['ice cream', 'cream', 'cake', 'candy'], correct: 0, hint: 'Doslova "ledový krém".' },
+        { q: '"Čerstvý džus" je:', options: ['fresh juice', 'cold drink', 'new water', 'soft drink'], correct: 0, hint: 'Fresh = čerstvý.' },
+        { q: '"Bez laktózy" je:', options: ['gluten-free', 'lactose-free', 'milk-free', 'dairy'], correct: 1, hint: '-free = bez.' }
+      ]
+    }
+  ],
+  hotel: [
+    {
+      id: 'hotel-1', title: 'Hlavní města Evropy', difficulty: 1,
+      questions: [
+        { q: 'Hlavní město Francie?', options: ['Lyon', 'Paříž', 'Marseille', 'Nice'], correct: 1, hint: 'Eiffelova věž.' },
+        { q: 'Hlavní město Španělska?', options: ['Barcelona', 'Madrid', 'Sevilla', 'Valencie'], correct: 1, hint: 'V centru země.' },
+        { q: 'Hlavní město Rakouska?', options: ['Salcburk', 'Graz', 'Vídeň', 'Linec'], correct: 2, hint: 'Na Dunaji.' },
+        { q: 'Hlavní město Řecka?', options: ['Soluň', 'Athény', 'Sparta', 'Korfu'], correct: 1, hint: 'Akropolis.' },
+        { q: 'Hlavní město Portugalska?', options: ['Porto', 'Lisabon', 'Madeira', 'Faro'], correct: 1, hint: 'U Atlantiku.' }
+      ]
+    },
+    {
+      id: 'hotel-2', title: 'Kraje ČR', difficulty: 2,
+      questions: [
+        { q: 'V jakém kraji leží Ústí nad Labem?', options: ['Liberecký', 'Ústecký', 'Karlovarský', 'Středočeský'], correct: 1, hint: 'Podle názvu města.' },
+        { q: 'Jihočeský kraj – hlavní město?', options: ['Tábor', 'Český Krumlov', 'České Budějovice', 'Písek'], correct: 2, hint: 'Budvar.' },
+        { q: 'Kolik krajů má ČR?', options: ['12', '13', '14', '15'], correct: 2, hint: 'Praha = samostatný kraj.' },
+        { q: 'V jakém kraji je Karlštejn?', options: ['Středočeský', 'Praha', 'Plzeňský', 'Ústecký'], correct: 0, hint: 'U Berouna.' },
+        { q: 'Nejvíce obyvatel má kraj:', options: ['Jihomoravský', 'Moravskoslezský', 'Středočeský', 'Praha'], correct: 2, hint: 'Největší podle počtu.' }
+      ]
+    },
+    {
+      id: 'hotel-3', title: 'Etiketa u stolu', difficulty: 1,
+      questions: [
+        { q: 'Ubrousek si pokládáme na:', options: ['stůl vedle talíře', 'klín', 'rameno', 'židli'], correct: 1, hint: 'Chrání oděv.' },
+        { q: 'Příbor po jídle ukládáme:', options: ['vedle talíře', 'na talíř rovnoběžně', 'křížem přes talíř', 'zpět na ubrousek'], correct: 1, hint: 'Značí to "dojedeno".' },
+        { q: 'Polévku jíme směrem:', options: ['k sobě', 'od sebe', 'z okraje', 'ze dna'], correct: 1, hint: 'Aby nestříkala.' },
+        { q: 'Přípitek: sklenkou:', options: ['silně ťukáme', 'jen pozvedneme a pohlédneme si do očí', 'přiklepneme o stůl', 'podáme si ruce'], correct: 1, hint: 'V moderní etiketě se netluče.' },
+        { q: 'Vidlička se drží v:', options: ['pravé ruce', 'levé ruce', 'obou rukách', 'podle jídla'], correct: 1, hint: 'Nůž v pravé, vidlička v levé.' }
+      ]
+    },
+    {
+      id: 'hotel-4', title: 'Typy hotelů a služeb', difficulty: 2,
+      questions: [
+        { q: '5* hotel je:', options: ['nejlevnější', 'střední třídy', 'luxusní', 'bez hvězd'], correct: 2, hint: 'Čím víc hvězd, tím lepší.' },
+        { q: 'Penzion se liší od hotelu:', options: ['velikostí a službami', 'cenou', 'je dražší', 'má jen snídaně'], correct: 0, hint: 'Menší, rodinný, méně služeb.' },
+        { q: '"Polopenze" znamená:', options: ['snídaně + oběd', 'snídaně + večeře', 'jen oběd', 'nic v ceně'], correct: 1, hint: 'Dvě hlavní jídla.' },
+        { q: 'Wellness hotel nabízí:', options: ['jen ubytování', 'relaxační a lázeňské služby', 'jen restauraci', 'konference'], correct: 1, hint: 'Sauna, masáže, bazén...' },
+        { q: '"Check-in" je:', options: ['odhlášení', 'přihlášení při příjezdu', 'objednání jídla', 'rezervace'], correct: 1, hint: 'Opak check-out.' }
+      ]
+    },
+    {
+      id: 'hotel-5', title: 'Gastronomické pojmy', difficulty: 2,
+      questions: [
+        { q: 'Aperitiv je:', options: ['nápoj před jídlem na povzbuzení chuti', 'zákusek', 'předkrm', 'dezert'], correct: 0, hint: 'Často šampaňské, vermut...' },
+        { q: 'Digestiv je:', options: ['před jídlem', 'po jídle na trávení', 's hlavním chodem', 'ranní drink'], correct: 1, hint: 'Koňak, likér po jídle.' },
+        { q: 'Co je "à la carte"?', options: ['menu dne', 'výběr z jídelního lístku', 'švédské stoly', 'dětské menu'], correct: 1, hint: 'Francouzsky "podle lístku".' },
+        { q: 'Sommelier je specialista na:', options: ['sýry', 'víno', 'pivo', 'kávu'], correct: 1, hint: 'Pochází z Francie.' },
+        { q: '"Bufet" je:', options: ['obsluha u stolu', 'samoobslužný výdej', 'pokojový servis', 'catering'], correct: 1, hint: 'Švédské stoly.' }
+      ]
+    }
+  ]
+};
+
+const BADGES = [
+  { id: 'diagnostic', icon: '🎯', name: 'Diagnostika hotová' },
+  { id: 'first-lesson', icon: '🌱', name: 'První lekce' },
+  { id: 'streak-3', icon: '🔥', name: '3denní série' },
+  { id: 'streak-7', icon: '⚡', name: 'Týdenní série' },
+  { id: 'perfect', icon: '💯', name: 'Lekce na 100 %' },
+  { id: 'level-5', icon: '⭐', name: 'Úroveň 5' },
+  { id: 'cj-done', icon: '📝', name: 'Čeština hotová' },
+  { id: 'm-done', icon: '🔢', name: 'Matika hotová' },
+  { id: 'aj-done', icon: '🇬🇧', name: 'Angličtina hotová' },
+  { id: 'hotel-done', icon: '🏨', name: 'Hotelovka hotová' },
+  { id: 'all-tracks', icon: '🏆', name: 'Mistr všeho' },
+  { id: 'daily-5', icon: '📅', name: '5 denních výzev' }
+];
+
+const STATE_KEY = 'mise-hotelovka-v1';
+const DAILY_GOAL_MIN = 15;    // minimum otázek pro udržení streaku
+const DAILY_GOAL_BONUS = 20;  // cíl pro bonus XP
+const DAILY_BONUS_XP = 25;    // kolik XP navíc za splnění bonusu
+const WEBHOOK_URL = '';       // Google Apps Script URL – až nasadíme
+
+function defaultState() {
+  return {
+    xp: 0, streak: 0, lastActiveDate: null,
+    diagnosticDone: false,
+    diagnosticResults: { cj: 0, m: 0, aj: 0, hotel: 0 },
+    completedLessons: [], lessonScores: {},
+    badges: [], dailyChallengeDate: null, dailyChallengesCount: 0,
+    // Denní cíl otázek
+    todayCount: 0, todayDate: null, bonusAwardedDate: null,
+    // "Tohle jsme ještě nebrali"
+    untaughtLessons: [],        // [{ id, track, title, markedAt }]
+    untaughtEvents: [],         // [{ type, lessonId, track, title, ts }]
+    pendingSync: [],            // události čekající na odeslání do Sheetu
+    // Sync metadata
+    lastSaved: null,            // ISO timestamp poslední změny
+    deviceId: null              // náhodné ID zařízení (pro debug)
+  };
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STATE_KEY);
+    if (!raw) return defaultState();
+    const merged = { ...defaultState(), ...JSON.parse(raw) };
+    // Migrace: pokud se dnes už aktivně učila (staré verze), předpokládáme diagnostiku jako započatý denní cíl
+    const today = new Date().toDateString();
+    if (merged.todayDate == null && merged.lastActiveDate === today && merged.diagnosticDone) {
+      merged.todayDate = today;
+      merged.todayCount = 20; // diagnostika má 20 otázek
+    }
+    return merged;
+  } catch (e) { return defaultState(); }
+}
+function saveState() {
+  state.lastSaved = new Date().toISOString();
+  localStorage.setItem(STATE_KEY, JSON.stringify(state));
+  syncSave();
+}
+// Verze bez push na webhook – pro interní použití (migrace, sync merge)
+function saveStateLocal() {
+  localStorage.setItem(STATE_KEY, JSON.stringify(state));
+}
+let state = loadState();
+if (!state.deviceId) {
+  state.deviceId = Math.random().toString(36).slice(2, 10);
+  saveStateLocal();
+}
+
+// Streak se už nezvyšuje prostým otevřením aplikace —
+// zvedá se až ve chvíli, kdy dcera v daný den zodpoví alespoň DAILY_GOAL_MIN otázek.
+function resetDailyIfNeeded() {
+  const today = new Date().toDateString();
+  if (state.todayDate !== today) {
+    state.todayDate = today;
+    state.todayCount = 0;
+  }
+}
+function checkStreakBadges() {
+  if (state.streak >= 3 && !state.badges.includes('streak-3')) earnBadge('streak-3');
+  if (state.streak >= 7 && !state.badges.includes('streak-7')) earnBadge('streak-7');
+}
+function incrementTodayCount() {
+  resetDailyIfNeeded();
+  const before = state.todayCount;
+  state.todayCount++;
+  const today = state.todayDate;
+
+  // Překročení denního minima → posuň streak
+  if (before < DAILY_GOAL_MIN && state.todayCount >= DAILY_GOAL_MIN) {
+    if (state.lastActiveDate !== today) {
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      if (state.lastActiveDate === yesterday) state.streak++;
+      else state.streak = 1;
+      state.lastActiveDate = today;
+      toast('🔥 Denní cíl splněn! Série: ' + state.streak);
+      checkStreakBadges();
+      logEvent('daily-goal-met', { streak: state.streak, count: state.todayCount });
+    }
+  }
+  // Bonus za 20 otázek denně – jen jednou za den
+  if (before < DAILY_GOAL_BONUS && state.todayCount >= DAILY_GOAL_BONUS && state.bonusAwardedDate !== today) {
+    state.bonusAwardedDate = today;
+    addXP(DAILY_BONUS_XP);
+    toast('🏆 20 otázek! +' + DAILY_BONUS_XP + ' XP bonus');
+    logEvent('daily-bonus', { count: state.todayCount });
+  }
+  saveState();
+}
+
+// ---------- "Tohle jsme ještě nebrali" ----------
+function isLessonUntaught(lessonId) {
+  return state.untaughtLessons.some(u => u.id === lessonId);
+}
+function markLessonUntaught(lessonId, track) {
+  const lesson = (LESSONS[track] || []).find(l => l.id === lessonId);
+  if (!lesson) return;
+  if (isLessonUntaught(lessonId)) return;
+  state.untaughtLessons.push({
+    id: lessonId, track: track, title: lesson.title,
+    markedAt: new Date().toISOString()
+  });
+  logEvent('lesson-untaught', { lessonId, track, title: lesson.title });
+  saveState();
+  toast('📒 Uloženo: „Tohle jsme ještě nebrali"');
+}
+function markLessonLearned(lessonId) {
+  const u = state.untaughtLessons.find(x => x.id === lessonId);
+  if (!u) return;
+  state.untaughtLessons = state.untaughtLessons.filter(x => x.id !== lessonId);
+  logEvent('lesson-learned', { lessonId: u.id, track: u.track, title: u.title });
+  saveState();
+  toast('✓ Super! Lekce „' + u.title + '" odemčená.');
+}
+
+// ---------- Event log ----------
+function logEvent(type, data) {
+  const ev = {
+    type: type,
+    ts: new Date().toISOString(),
+    deviceId: state.deviceId,
+    ...(data || {})
+  };
+  state.untaughtEvents.push(ev);
+  if (state.untaughtEvents.length > 500) state.untaughtEvents = state.untaughtEvents.slice(-500);
+  state.pendingSync.push(ev);
+  if (state.pendingSync.length > 500) state.pendingSync = state.pendingSync.slice(-500);
+  // Odeslat jednotlivou událost do Sheetu (fire and forget)
+  if (WEBHOOK_URL) {
+    try {
+      fetch(WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        // text/plain je tzv. simple request → projde bez CORS preflight
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'log_event', event: ev })
+      }).catch(() => {});
+    } catch (e) {}
+  }
+}
+
+// ---------- Cross-device sync přes Google Sheet ----------
+let _syncTimer = null;
+function syncSave() {
+  if (!WEBHOOK_URL) return;
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(() => {
+    try {
+      fetch(WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'save_state', state: state })
+      }).catch(() => {});
+    } catch (e) {}
+  }, 1500); // debounce 1.5s
+}
+
+async function syncLoad() {
+  if (!WEBHOOK_URL) return false;
+  try {
+    const res = await fetch(WEBHOOK_URL + '?action=load', {
+      method: 'GET',
+      redirect: 'follow'
+    });
+    if (!res.ok) return false;
+    const json = await res.json();
+    if (!json || !json.ok || !json.state) return false;
+    const remote = json.state;
+    const localTs = state.lastSaved ? new Date(state.lastSaved).getTime() : 0;
+    const remoteTs = remote.lastSaved ? new Date(remote.lastSaved).getTime() : 0;
+    if (remoteTs > localTs) {
+      // remote je novější – přepíšeme
+      state = { ...defaultState(), ...remote, deviceId: state.deviceId };
+      saveStateLocal();
+      return true;
+    } else if (localTs > remoteTs) {
+      // local je novější – push na server
+      syncSave();
+    }
+    return false;
+  } catch (e) {
+    console.warn('syncLoad failed', e);
+    return false;
+  }
+}
+function level() { return Math.floor(state.xp / 100) + 1; }
+function xpInLevel() { return state.xp % 100; }
+function addXP(amount) {
+  const before = level();
+  state.xp += amount;
+  const after = level();
+  saveState();
+  if (after > before) {
+    toast('🎉 Level ' + after + '!');
+    if (after >= 5 && !state.badges.includes('level-5')) earnBadge('level-5');
+  }
+}
+function earnBadge(id) {
+  if (state.badges.includes(id)) return;
+  state.badges.push(id);
+  saveState();
+  const badge = BADGES.find(b => b.id === id);
+  if (badge) toast(badge.icon + ' Odznak: ' + badge.name);
+}
+function trackProgress(trackKey) {
+  const total = LESSONS[trackKey].length;
+  const done = LESSONS[trackKey].filter(l => state.completedLessons.includes(l.id)).length;
+  return { done, total, pct: total ? (done / total) * 100 : 0 };
+}
+
+let current = { screen: 'home', params: {} };
+
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  app.appendChild(headerEl());
+  const screens = {
+    home: renderHome,
+    diagnostic: renderDiagnostic,
+    'diagnostic-result': renderDiagnosticResult,
+    track: renderTrack,
+    lesson: renderLesson,
+    'lesson-result': renderLessonResult,
+    daily: renderDaily,
+    badges: renderBadges,
+    untaught: renderUntaught
+  };
+  const fn = screens[current.screen] || renderHome;
+  app.appendChild(fn(current.params));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function go(screen, params) {
+  current = { screen, params: params || {} };
+  render();
+}
+window.go = go;
+
+function headerEl() {
+  const h = document.createElement('header');
+  h.innerHTML =
+    '<div class="logo" style="cursor:pointer" onclick="go(\u0027home\u0027)">✨ Mise: Hotelovka</div>' +
+    '<div class="stats">' +
+      '<div class="stat streak" title="Série dní">🔥 ' + state.streak + '</div>' +
+      '<div class="stat xp" title="Body">⚡ ' + state.xp + '</div>' +
+      '<div class="stat level" title="Úroveň">⭐ ' + level() + '</div>' +
+    '</div>';
+  return h;
+}
+
+function renderHome() {
+  const wrap = document.createElement('div');
+  if (!state.diagnosticDone) {
+    wrap.innerHTML =
+      '<div class="hero">' +
+        '<div class="emoji">🏨</div>' +
+        '<h1>Vítej v misi!</h1>' +
+        '<p>Společně tě připravíme na přijímačky na hotelovku. Procvičíš si češtinu, matiku, angličtinu i všeobecný přehled — formou hry, ne biflování.</p>' +
+        '<button class="btn" onclick="go(\u0027diagnostic\u0027)">Začít diagnostikou &nbsp;→</button>' +
+      '</div>' +
+      '<div class="card">' +
+        '<h2>Co tě čeká</h2>' +
+        '<p style="margin-bottom:12px">Nejdřív krátká diagnostika (20 otázek, asi 10 minut). Podle výsledků ti ukážeme, kde začít. Pak čtyři tracky, denní výzvy a odznaky za pokrok.</p>' +
+        '<div class="track-grid">' +
+          Object.entries(TRACKS).map(([k,t]) =>
+            '<div class="track-card ' + k + '">' +
+              '<div class="icon">' + t.icon + '</div>' +
+              '<h3>' + t.name + '</h3>' +
+              '<div class="subtitle">' + t.subtitle + '</div>' +
+            '</div>'
+          ).join('') +
+        '</div>' +
+      '</div>';
+    return wrap;
+  }
+  const today = new Date().toDateString();
+  resetDailyIfNeeded();
+  const dailyDone = state.dailyChallengeDate === today;
+  const count = state.todayCount || 0;
+  const goalMet = count >= DAILY_GOAL_MIN;
+  const bonusMet = count >= DAILY_GOAL_BONUS;
+  const minPct = Math.min(100, (count / DAILY_GOAL_MIN) * 100);
+  const untaughtCount = state.untaughtLessons.length;
+
+  wrap.innerHTML =
+    // Denní cíl (streak + bonus)
+    '<div class="goal-card">' +
+      '<div class="goal-head">' +
+        '<div class="goal-title">🎯 Dnešní cíl</div>' +
+        '<div class="goal-count">' + count + ' / ' + DAILY_GOAL_MIN +
+          (bonusMet ? ' <span style="color:#fbbf24">+🏆</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="goal-bar">' +
+        '<div class="goal-bar-fill ' + (goalMet ? 'done' : '') + '" style="width:' + minPct + '%"></div>' +
+        '<div class="goal-bar-milestone" style="left:' + ((DAILY_GOAL_MIN / DAILY_GOAL_BONUS) * 100) + '%"></div>' +
+      '</div>' +
+      '<div class="goal-meta">' +
+        (goalMet
+          ? (bonusMet
+              ? '🏆 Super! Dnes máš splněný cíl i bonus.'
+              : '✓ Streak v suchu. ' + (DAILY_GOAL_BONUS - count) + ' otázek k bonusu +' + DAILY_BONUS_XP + ' XP.')
+          : 'Ještě ' + (DAILY_GOAL_MIN - count) + ' otázek pro udržení série 🔥.'
+        ) +
+      '</div>' +
+    '</div>' +
+    // Denní výzva
+    '<div class="daily ' + (dailyDone ? 'done' : '') + '" ' + (dailyDone ? '' : 'onclick="go(\u0027daily\u0027)"') + '>' +
+      '<div class="label">DENNÍ VÝZVA ' + (dailyDone ? '✓' : '') + '</div>' +
+      '<h3>' + (dailyDone ? 'Dnešní výzva splněna. Přijď zase zítra.' : 'Rychlá otázka — 2× XP navíc') + '</h3>' +
+      '<p style="font-size:13px; margin-top:4px">' + (dailyDone ? 'Zatím jsi zvládla ' + state.dailyChallengesCount + ' denních výzev.' : 'Jedna otázka napříč předměty. Trvá 30 vteřin.') + '</p>' +
+    '</div>' +
+    '<h2 style="margin: 20px 0 12px 4px">Tracky</h2>' +
+    '<div class="track-grid">' +
+      Object.entries(TRACKS).map(([k,t]) => {
+        const p = trackProgress(k);
+        return '<div class="track-card ' + k + '" onclick="go(\u0027track\u0027, {track: \u0027' + k + '\u0027})">' +
+          '<div class="icon">' + t.icon + '</div>' +
+          '<h3>' + t.name + '</h3>' +
+          '<div class="subtitle">' + t.subtitle + '</div>' +
+          '<div class="progress"><div class="progress-bar" style="width:' + p.pct + '%"></div></div>' +
+          '<div class="progress-text">' + p.done + ' / ' + p.total + ' lekcí</div>' +
+        '</div>';
+      }).join('') +
+    '</div>' +
+    // Co jsme ještě nebrali
+    (untaughtCount > 0
+      ? '<div class="card clickable" style="margin-top:16px; border-color:rgba(245,158,11,0.4); background:linear-gradient(135deg, rgba(245,158,11,0.08), rgba(236,72,153,0.05))" onclick="go(\u0027untaught\u0027)">' +
+          '<h2>📒 Co jsme ještě nebrali</h2>' +
+          '<p>' + untaughtCount + ' ' + (untaughtCount === 1 ? 'lekce čeká' : (untaughtCount < 5 ? 'lekce čekají' : 'lekcí čeká')) + ' na to, až si látku projdete společně. Klikni pro přehled.</p>' +
+        '</div>'
+      : '') +
+    '<div class="card clickable" style="margin-top:16px" onclick="go(\u0027badges\u0027)">' +
+      '<h2>Odznaky</h2>' +
+      '<p>' + state.badges.length + ' / ' + BADGES.length + ' získaných</p>' +
+      '<div class="badge-grid">' +
+        BADGES.slice(0, 8).map(b =>
+          '<div class="badge ' + (state.badges.includes(b.id) ? 'earned' : '') + '" title="' + b.name + '">' + b.icon + '</div>'
+        ).join('') +
+      '</div>' +
+    '</div>';
+  return wrap;
+}
+
+function renderDiagnostic(params) {
+  const idx = params.idx || 0;
+  const answers = params.answers || [];
+  const q = DIAGNOSTIC[idx];
+  const wrap = document.createElement('div');
+  wrap.innerHTML =
+    '<button class="back-btn" onclick="go(\u0027home\u0027)">← Zpět</button>' +
+    '<div class="progress-top"><div class="progress-top-bar" style="width:' + ((idx)/DIAGNOSTIC.length)*100 + '%"></div></div>' +
+    '<div class="question-card">' +
+      '<div class="question-num">OTÁZKA ' + (idx+1) + ' / ' + DIAGNOSTIC.length + ' · <span class="chip ' + q.track + '">' + TRACKS[q.track].name + '</span></div>' +
+      '<div class="question-text">' + q.q + '</div>' +
+      '<div class="options">' +
+        q.options.map((opt, i) => '<div class="option" data-idx="' + i + '">' + opt + '</div>').join('') +
+      '</div>' +
+    '</div>';
+  wrap.querySelectorAll('.option').forEach(el => {
+    el.onclick = () => {
+      const selected = parseInt(el.dataset.idx);
+      wrap.querySelectorAll('.option').forEach(o => o.style.pointerEvents = 'none');
+      wrap.querySelectorAll('.option').forEach((o, i) => {
+        if (i === q.correct) o.classList.add('correct');
+        if (i === selected && selected !== q.correct) o.classList.add('wrong');
+      });
+      answers.push({ track: q.track, correct: selected === q.correct });
+      incrementTodayCount();
+      setTimeout(() => {
+        if (idx + 1 < DIAGNOSTIC.length) go('diagnostic', { idx: idx + 1, answers });
+        else finishDiagnostic(answers);
+      }, 900);
+    };
+  });
+  return wrap;
+}
+
+function finishDiagnostic(answers) {
+  const results = { cj: { c: 0, t: 0 }, m: { c: 0, t: 0 }, aj: { c: 0, t: 0 }, hotel: { c: 0, t: 0 } };
+  answers.forEach(a => { results[a.track].t++; if (a.correct) results[a.track].c++; });
+  state.diagnosticResults = {
+    cj: results.cj.t ? Math.round((results.cj.c / results.cj.t) * 100) : 0,
+    m: results.m.t ? Math.round((results.m.c / results.m.t) * 100) : 0,
+    aj: results.aj.t ? Math.round((results.aj.c / results.aj.t) * 100) : 0,
+    hotel: results.hotel.t ? Math.round((results.hotel.c / results.hotel.t) * 100) : 0
+  };
+  state.diagnosticDone = true;
+  const totalCorrect = answers.filter(a => a.correct).length;
+  addXP(totalCorrect * 5);
+  earnBadge('diagnostic');
+  saveState();
+  go('diagnostic-result', { total: totalCorrect, max: answers.length });
+}
+
+function renderDiagnosticResult(params) {
+  const r = state.diagnosticResults;
+  const entries = Object.entries(r).sort((a,b) => a[1] - b[1]);
+  const weakest = entries[0];
+  const strongest = entries[entries.length - 1];
+  const wrap = document.createElement('div');
+  wrap.innerHTML =
+    '<div class="result-hero">' +
+      '<div class="emoji" style="font-size:48px">🎯</div>' +
+      '<h2>Diagnostika hotová!</h2>' +
+      '<div class="score">' + params.total + ' / ' + params.max + '</div>' +
+      '<p>Získala jsi ' + (params.total * 5) + ' XP</p>' +
+    '</div>' +
+    '<div class="card">' +
+      '<h2>Tvoje výsledky</h2>' +
+      '<div class="diagnostic-results">' +
+        Object.entries(r).map(([k,v]) =>
+          '<div class="result-item">' +
+            '<div class="name">' + TRACKS[k].icon + ' ' + TRACKS[k].name + '</div>' +
+            '<div class="bar"><div class="bar-fill" style="width:' + v + '%; background:' + TRACKS[k].color + '"></div></div>' +
+            '<div class="pct">' + v + ' %</div>' +
+          '</div>'
+        ).join('') +
+      '</div>' +
+      '<p style="margin-top:12px">' +
+        (weakest[1] < 60
+          ? '<strong>Doporučení:</strong> Začni v tracku <strong>' + TRACKS[weakest[0]].name + '</strong> — tam máš největší prostor růst.'
+          : '<strong>Super základ!</strong> Můžeš se pustit do libovolného tracku — nejvíc se ti daří v ' + TRACKS[strongest[0]].name + '.') +
+      '</p>' +
+    '</div>' +
+    '<button class="btn" onclick="go(\u0027home\u0027)">Přejít na dashboard</button>';
+  return wrap;
+}
+
+function renderTrack(params) {
+  const track = params.track;
+  const t = TRACKS[track];
+  const lessons = LESSONS[track];
+  const wrap = document.createElement('div');
+  wrap.innerHTML =
+    '<button class="back-btn" onclick="go(\u0027home\u0027)">← Dashboard</button>' +
+    '<div class="hero" style="padding:20px">' +
+      '<div class="emoji">' + t.icon + '</div>' +
+      '<h1>' + t.name + '</h1>' +
+      '<p>' + t.subtitle + '</p>' +
+    '</div>' +
+    '<h2 style="margin: 16px 0 12px 4px">Lekce</h2>' +
+    '<div class="lesson-list">' +
+      lessons.map((l, i) => {
+        const done = state.completedLessons.includes(l.id);
+        const untaught = isLessonUntaught(l.id);
+        const score = state.lessonScores[l.id];
+        const stars = '★'.repeat(l.difficulty) + '☆'.repeat(3 - l.difficulty);
+        const klass = 'lesson-item ' + (done ? 'done ' : '') + (untaught ? 'untaught' : '');
+        const click = untaught
+          ? 'onclick="go(\u0027untaught\u0027)"'
+          : 'onclick="go(\u0027lesson\u0027, {track:\u0027' + track + '\u0027, lessonId:\u0027' + l.id + '\u0027})"';
+        return '<div class="' + klass + '" ' + click + '>' +
+          '<div class="num">' + (done ? '✓' : (untaught ? '📒' : (i+1))) + '</div>' +
+          '<div class="info">' +
+            '<div class="title">' + l.title + (untaught ? '<span class="lesson-untaught-badge">JEŠTĚ NEBRALI</span>' : '') + '</div>' +
+            '<div class="meta">' + l.questions.length + ' otázek · obtížnost ' + stars + (done ? ' · výsledek ' + score + '%' : '') + (untaught ? ' · čeká na probrání' : '') + '</div>' +
+          '</div>' +
+          '<div class="arrow">→</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  return wrap;
+}
+
+function renderLesson(params) {
+  const track = params.track;
+  const lesson = LESSONS[track].find(l => l.id === params.lessonId);
+  const idx = params.idx || 0;
+  const answers = params.answers || [];
+  const q = lesson.questions[idx];
+  const wrap = document.createElement('div');
+  wrap.innerHTML =
+    '<button class="back-btn" onclick="go(\u0027track\u0027, {track: \u0027' + track + '\u0027})">← ' + lesson.title + '</button>' +
+    '<div class="progress-top"><div class="progress-top-bar" style="width:' + ((idx)/lesson.questions.length)*100 + '%; background: ' + TRACKS[track].color + '"></div></div>' +
+    '<div class="question-card">' +
+      '<div class="question-num">' + (idx+1) + ' / ' + lesson.questions.length + '</div>' +
+      '<div class="question-text">' + q.q + '</div>' +
+      '<div class="options">' +
+        q.options.map((opt, i) => '<div class="option" data-idx="' + i + '">' + opt + '</div>').join('') +
+      '</div>' +
+      '<button class="untaught-btn" id="untaught-btn">📒 Tohle jsme ještě nebrali</button>' +
+      '<div id="feedback"></div>' +
+    '</div>';
+  const untaughtBtn = wrap.querySelector('#untaught-btn');
+  if (untaughtBtn) {
+    untaughtBtn.onclick = () => {
+      if (!confirm('Označit celou lekci „' + lesson.title + '" jako neprobranou? Přeskočíme ji a uložíme do seznamu „Co jsme ještě nebrali".')) return;
+      markLessonUntaught(lesson.id, track);
+      go('track', { track });
+    };
+  }
+  let answered = false;
+  wrap.querySelectorAll('.option').forEach(el => {
+    el.onclick = () => {
+      if (answered) return;
+      answered = true;
+      const selected = parseInt(el.dataset.idx);
+      wrap.querySelectorAll('.option').forEach(o => o.style.pointerEvents = 'none');
+      wrap.querySelectorAll('.option').forEach((o, i) => {
+        if (i === q.correct) o.classList.add('correct');
+        if (i === selected && selected !== q.correct) o.classList.add('wrong');
+      });
+      const correct = selected === q.correct;
+      answers.push({ correct });
+      incrementTodayCount();
+      const ubtn = wrap.querySelector('#untaught-btn');
+      if (ubtn) ubtn.style.display = 'none';
+      const fb = wrap.querySelector('#feedback');
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.style.marginTop = '12px';
+      btn.textContent = idx + 1 < lesson.questions.length ? 'Další otázka →' : 'Dokončit lekci →';
+      btn.onclick = () => {
+        if (idx + 1 < lesson.questions.length) {
+          go('lesson', { track, lessonId: lesson.id, idx: idx + 1, answers });
+        } else {
+          finishLesson(track, lesson.id, answers);
+        }
+      };
+      fb.innerHTML =
+        '<div class="feedback ' + (correct ? 'correct' : 'wrong') + '">' +
+          (correct ? '✓ Správně!' : '✗ Správná odpověď: ' + q.options[q.correct]) +
+          (q.hint ? '<br><span style="font-weight:400;color:var(--text-dim);font-size:13px">💡 ' + q.hint + '</span>' : '') +
+        '</div>';
+      fb.appendChild(btn);
+    };
+  });
+  return wrap;
+}
+
+function finishLesson(track, lessonId, answers) {
+  const correct = answers.filter(a => a.correct).length;
+  const total = answers.length;
+  const pct = Math.round((correct / total) * 100);
+  const wasNew = !state.completedLessons.includes(lessonId);
+  if (wasNew) state.completedLessons.push(lessonId);
+  state.lessonScores[lessonId] = Math.max(state.lessonScores[lessonId] || 0, pct);
+  const gained = 10 + correct * 2 + (pct === 100 ? 20 : 0);
+  addXP(gained);
+  if (state.completedLessons.length === 1) earnBadge('first-lesson');
+  if (pct === 100) earnBadge('perfect');
+  const tp = trackProgress(track);
+  if (tp.done === tp.total) earnBadge(track + '-done');
+  const allDone = Object.keys(TRACKS).every(k => {
+    const p = trackProgress(k);
+    return p.done === p.total;
+  });
+  if (allDone) earnBadge('all-tracks');
+  saveState();
+  go('lesson-result', { track, lessonId, correct, total, pct, gained });
+}
+
+function renderLessonResult(params) {
+  const lesson = LESSONS[params.track].find(l => l.id === params.lessonId);
+  const wrap = document.createElement('div');
+  const emoji = params.pct === 100 ? '💯' : params.pct >= 80 ? '🎉' : params.pct >= 60 ? '👍' : '💪';
+  wrap.innerHTML =
+    '<div class="result-hero">' +
+      '<div class="emoji" style="font-size:48px">' + emoji + '</div>' +
+      '<h2>' + lesson.title + '</h2>' +
+      '<div class="score">' + params.correct + ' / ' + params.total + '</div>' +
+      '<p>' + params.pct + ' % · +' + params.gained + ' XP</p>' +
+    '</div>' +
+    '<div class="btn-group">' +
+      '<button class="btn secondary" onclick="go(\u0027lesson\u0027, {track:\u0027' + params.track + '\u0027, lessonId:\u0027' + params.lessonId + '\u0027})">Zopakovat</button>' +
+      '<button class="btn" onclick="go(\u0027track\u0027, {track:\u0027' + params.track + '\u0027})">Další lekce →</button>' +
+    '</div>';
+  return wrap;
+}
+
+function renderDaily(params) {
+  params = params || {};
+  const today = new Date().toDateString();
+  // Fond otázek: diagnostika + lekce, které nejsou označené jako "ještě nebrali"
+  const allQ = DIAGNOSTIC.map(x => ({ ...x, _src: 'diag' }));
+  Object.entries(LESSONS).forEach(([trackKey, arr]) => {
+    arr.forEach(l => {
+      if (isLessonUntaught(l.id)) return; // přeskoč neprobrané
+      l.questions.forEach(qq => allQ.push({ ...qq, track: trackKey, _lessonId: l.id }));
+    });
+  });
+  let q;
+  if (typeof params.qIdx === 'number' && allQ[params.qIdx]) {
+    q = allQ[params.qIdx];
+  } else {
+    let hash = 0;
+    for (let i = 0; i < today.length; i++) hash = (hash * 31 + today.charCodeAt(i)) | 0;
+    q = allQ[Math.abs(hash) % allQ.length];
+  }
+  const wrap = document.createElement('div');
+  wrap.innerHTML =
+    '<button class="back-btn" onclick="go(\u0027home\u0027)">← Dashboard</button>' +
+    '<div class="hero" style="padding:20px">' +
+      '<div class="emoji" style="font-size:40px">📅</div>' +
+      '<h2>Denní výzva</h2>' +
+      '<p>2× XP bonus</p>' +
+    '</div>' +
+    '<div class="question-card">' +
+      '<div class="question-num"><span class="chip ' + q.track + '">' + TRACKS[q.track].name + '</span></div>' +
+      '<div class="question-text">' + q.q + '</div>' +
+      '<div class="options">' +
+        q.options.map((opt, i) => '<div class="option" data-idx="' + i + '">' + opt + '</div>').join('') +
+      '</div>' +
+      (q._lessonId
+        ? '<button class="untaught-btn" id="untaught-btn">📒 Tohle jsme ještě nebrali</button>'
+        : '') +
+      '<div id="feedback"></div>' +
+    '</div>';
+  const untaughtBtn = wrap.querySelector('#untaught-btn');
+  if (untaughtBtn) {
+    untaughtBtn.onclick = () => {
+      const lesson = (LESSONS[q.track] || []).find(l => l.id === q._lessonId);
+      if (!lesson) return;
+      if (!confirm('Označit celou lekci „' + lesson.title + '" jako neprobranou a vygenerovat jinou otázku?')) return;
+      markLessonUntaught(q._lessonId, q.track);
+      // Spočítat nový index v novém fondu
+      const nextPool = DIAGNOSTIC.map(x => ({ ...x, _src: 'diag' }));
+      Object.entries(LESSONS).forEach(([trackKey, arr]) => {
+        arr.forEach(l => {
+          if (isLessonUntaught(l.id)) return;
+          l.questions.forEach(qq => nextPool.push({ ...qq, track: trackKey, _lessonId: l.id }));
+        });
+      });
+      let hash = Date.now() | 0;
+      const newIdx = nextPool.length ? (Math.abs(hash) % nextPool.length) : 0;
+      go('daily', { qIdx: newIdx });
+    };
+  }
+  let answered = false;
+  wrap.querySelectorAll('.option').forEach(el => {
+    el.onclick = () => {
+      if (answered) return;
+      answered = true;
+      const selected = parseInt(el.dataset.idx);
+      wrap.querySelectorAll('.option').forEach(o => o.style.pointerEvents = 'none');
+      wrap.querySelectorAll('.option').forEach((o, i) => {
+        if (i === q.correct) o.classList.add('correct');
+        if (i === selected && selected !== q.correct) o.classList.add('wrong');
+      });
+      const correct = selected === q.correct;
+      const gained = correct ? 20 : 5;
+      addXP(gained);
+      incrementTodayCount();
+      const ubtn = wrap.querySelector('#untaught-btn');
+      if (ubtn) ubtn.style.display = 'none';
+      state.dailyChallengeDate = today;
+      state.dailyChallengesCount++;
+      if (state.dailyChallengesCount >= 5) earnBadge('daily-5');
+      saveState();
+      const fb = wrap.querySelector('#feedback');
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.style.marginTop = '12px';
+      btn.textContent = 'Zpět na dashboard →';
+      btn.onclick = () => go('home');
+      fb.innerHTML =
+        '<div class="feedback ' + (correct ? 'correct' : 'wrong') + '">' +
+          (correct ? '✓ Správně! +20 XP' : '✗ Správně: ' + q.options[q.correct] + ' · +5 XP za pokus') +
+          (q.hint ? '<br><span style="font-weight:400;color:var(--text-dim);font-size:13px">💡 ' + q.hint + '</span>' : '') +
+        '</div>';
+      fb.appendChild(btn);
+    };
+  });
+  return wrap;
+}
+
+function renderUntaught() {
+  const wrap = document.createElement('div');
+  const list = state.untaughtLessons;
+  if (!list.length) {
+    wrap.innerHTML =
+      '<button class="back-btn" onclick="go(\u0027home\u0027)">← Dashboard</button>' +
+      '<div class="hero" style="padding:20px">' +
+        '<div class="emoji" style="font-size:40px">📒</div>' +
+        '<h2>Co jsme ještě nebrali</h2>' +
+        '<p>Zatím nic. Všechno, co ti přijde, zvládáš — nebo to aspoň nezavrhuješ. 🙌</p>' +
+      '</div>';
+    return wrap;
+  }
+  wrap.innerHTML =
+    '<button class="back-btn" onclick="go(\u0027home\u0027)">← Dashboard</button>' +
+    '<div class="hero" style="padding:20px">' +
+      '<div class="emoji" style="font-size:40px">📒</div>' +
+      '<h2>Co jsme ještě nebrali</h2>' +
+      '<p>' + list.length + ' ' + (list.length === 1 ? 'lekce čeká' : (list.length < 5 ? 'lekce čekají' : 'lekcí čeká')) + ' na probrání s rodičem / učitelkou. Až látku projdete, klikni „Už to umím" — lekce se vrátí mezi ostatní.</p>' +
+    '</div>' +
+    '<div class="lesson-list">' +
+      list.map(u => {
+        const t = TRACKS[u.track] || { name: u.track, icon: '📚' };
+        const when = (() => {
+          try { return new Date(u.markedAt).toLocaleDateString('cs-CZ'); }
+          catch (e) { return ''; }
+        })();
+        return '<div class="lesson-item untaught" style="cursor:default">' +
+          '<div class="num">' + t.icon + '</div>' +
+          '<div class="info">' +
+            '<div class="title">' + u.title + '</div>' +
+            '<div class="meta">' + t.name + (when ? ' · uloženo ' + when : '') + '</div>' +
+          '</div>' +
+          '<button class="btn success" style="width:auto;padding:8px 12px;font-size:13px" onclick="__markLearned(\u0027' + u.id + '\u0027)">Už to umím</button>' +
+        '</div>';
+      }).join('') +
+    '</div>' +
+    '<div class="card" style="margin-top:16px">' +
+      '<h3 style="margin-bottom:8px">Pro rodiče</h3>' +
+      '<p style="font-size:13px">Tento seznam je signál, jakým tématům se věnovat společně. ' +
+      'Seznam se také posílá do Google Sheetu (až bude nakonfigurováno), abyste měli přehled i mimo aplikaci.</p>' +
+    '</div>';
+  return wrap;
+}
+window.__markLearned = function(lessonId) {
+  if (!confirm('Označit lekci jako zvládnutou a vrátit ji mezi ostatní?')) return;
+  markLessonLearned(lessonId);
+  render();
+};
+
+function renderBadges() {
+  const wrap = document.createElement('div');
+  wrap.innerHTML =
+    '<button class="back-btn" onclick="go(\u0027home\u0027)">← Dashboard</button>' +
+    '<div class="hero" style="padding:20px">' +
+      '<div class="emoji" style="font-size:40px">🏅</div>' +
+      '<h2>Odznaky</h2>' +
+      '<p>' + state.badges.length + ' / ' + BADGES.length + ' získaných</p>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div class="badge-grid" style="grid-template-columns: repeat(3, 1fr); gap:12px">' +
+        BADGES.map(b =>
+          '<div style="text-align:center">' +
+            '<div class="badge ' + (state.badges.includes(b.id) ? 'earned' : '') + '" style="margin-bottom:6px">' + b.icon + '</div>' +
+            '<div style="font-size:11px;font-weight:600;color:' + (state.badges.includes(b.id) ? 'var(--text)' : 'var(--text-dim)') + '">' + b.name + '</div>' +
+          '</div>'
+        ).join('') +
+      '</div>' +
+    '</div>';
+  return wrap;
+}
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// Při startu: zkusit natáhnout novější stav z cloudu, pak reset denního počítadla + render
+resetDailyIfNeeded();
+saveStateLocal();
+checkStreakBadges();
+render();
+// Background sync: po načtení zkusíme tahnout cloud, a pokud je novější, překreslíme
+if (WEBHOOK_URL) {
+  syncLoad().then(updated => {
+    if (updated) {
+      toast('🔄 Načteno z druhého zařízení');
+      resetDailyIfNeeded();
+      saveStateLocal();
+      render();
+    }
+  });
+}
+</script>
+</body>
+</html>
